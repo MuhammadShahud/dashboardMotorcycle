@@ -1,0 +1,247 @@
+    const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [activeItem, setActiveItem] = useState({});
+  const router = useRouter();
+  const [quizzes, setQuizzes] = useState([
+    {
+      id: "123912-34123094182",
+      title: "some title",
+      description: "some description",
+      createdAt: "20/02/21",
+      author: "some body",
+      slug: "title",
+      subscriptionType: "premium",
+    },
+  ]);
+  const [searchQuizzes, setSearchQuizzes] = useState(quizzes);
+  const [searchText, setSearchText] = useState("");
+
+  useEffect(() => {
+    state.activeTab = 7;
+  }, [router.pathname]);
+
+  useEffect(() => {
+    setSearchQuizzes(
+      quizzes.filter((quiz) => {
+        if (!searchText) return quiz;
+        return (
+          quiz.title.toLowerCase().includes(searchText) ||
+          quiz.subType.toLowerCase().includes(searchText) ||
+          quiz.description.toLowerCase().includes(searchText)
+        );
+      })
+    );
+  }, [searchText]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setSearchQuizzes(
+      quizzes.filter((quiz) => {
+        if (!searchText) return quiz;
+        return (
+          quiz.title.toLowerCase().includes(searchText) ||
+          quiz.subType.toLowerCase().includes(searchText) ||
+          quiz.description.toLowerCase().includes(searchText)
+        );
+      })
+    );
+  };
+
+  useEffect(() => {
+    if (sessionStorage.length == 0) {
+      router.push("/login");
+    }
+    if (loading) {
+      getQuizzes();
+    }
+  }, [router.pathname, ]);
+
+  const toggleModal = (isEdit = false, activeItem = {}) => {
+    if (!isEdit) {
+      setIsEdit(false);
+      setActiveItem({});
+    } else {
+      setIsEdit(true);
+      setActiveItem(activeItem);
+    }
+    setShowModal(!showModal);
+  };
+
+  const getQuizzes = () => {
+    Transport.HTTP.getQuizesSet(sessionStorage.getItem("token"))
+      .then((res) => {
+        setQuizzes(res.data.data);
+        setSearchQuizzes(res.data.data);
+        setLoading(false);
+      })
+      .catch((err) => alert(err));
+  };
+  
+  
+  
+  
+  
+  
+   <Header />
+      <div className={"flex grid grid-cols-12 w-screen h-screen bg-white-400"}>
+        <SideNavbar />
+
+        <div className="p-10 flex flex-col col-span-10  h-screen">
+          <div className={"h-16 flex items-center justify-between  mb-4"}>
+            <div className="pb-2">
+              <form method="GET" onSubmit={handleSearch}>
+                <div className="relative min-w-50">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-2">
+                    <button
+                      type="submit"
+                      className="p-1 focus:outline-none focus:shadow-outline"
+                    >
+                      <svg
+                        fill="none"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                        className="w-6 h-6"
+                      >
+                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                      </svg>
+                    </button>
+                  </span>
+                  <input
+                    type="search"
+                    name="q"
+                    className="py-2 text-sm text-white border rounded-md pl-10 focus:outline-none focus:bg-white focus:text-gray-900"
+                    placeholder="Search..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    autoComplete="off"
+                  />
+                </div>
+              </form>
+            </div>
+            <button
+              onClick={() => {
+                router.push("/quizzes/create");
+              }}
+              className={
+                "h-12 w-80 bg-blue-500 flex items-center justify-center rounded-sm"
+              }
+            >
+              <p className={"text-lg text-white"}>Add New</p>
+            </button>
+          </div>
+
+          <div
+            className={"h-16 w-full flex items-center bg-gray-100 pl-4 pr-4"}
+          >
+            <p
+              className={
+                "h-8 w-20 border-r border-gray-300 text-black text-lg font-semibold p-0 m-0 text-center"
+              }
+            >
+              #
+            </p>
+            <p
+              className={
+                "h-8 w-64 border-r border-gray-300 text-black text-lg font-semibold ml-4 p-0 m-0"
+              }
+            >
+              Title
+            </p>
+            <p
+              className={
+                "h-8 w-96 border-r border-gray-300 text-black text-lg font-semibold ml-4 p-0 m-0"
+              }
+            >
+              Description
+            </p>
+            <p
+              className={
+                "h-8 w-96 border-r border-gray-300 text-black text-lg font-semibold ml-4 p-0 m-0"
+              }
+            >
+              Author
+            </p>
+            <p
+              className={
+                "h-8 w-64 border-r border-gray-300 text-black text-lg font-semibold ml-4 p-0 m-0"
+              }
+            >
+              Subscription Type
+            </p>
+            <p
+              className={
+                "h-8 w-64 border-r border-gray-300 text-black text-lg font-semibold ml-4 p-0 m-0"
+              }
+            >
+              Date
+            </p>
+          </div>
+
+          {loading ? (
+            <div className="flex w-full items-center justify-center">
+              <div className="animate-spin rounded-full h-10 w-10 mt-5 border-b-4 border-blue-500" />
+            </div>
+          ) : (
+            <>
+              {searchQuizzes.map((quiz, index) => (
+                <div
+                  onClick={() => {
+                    router.push(`/quizzes/${quiz.id}`);
+                  }}
+                  className={
+                    "cursor-pointer h-16 w-full flex items-center bg-white pl-4 pr-4 border-b border-gray-200"
+                  }
+                >
+                  <p
+                    className={
+                      "h-8 w-20 border-gray-300 text-gray-600 text-lg  p-0 m-0 text-center"
+                    }
+                  >
+                    {index + 1}
+                  </p>
+                  <p
+                    className={
+                      "truncate h-8 w-64 border-gray-300 text-gray-600 text-lg  ml-4 p-0 m-0"
+                    }
+                  >
+                    {quiz.title}
+                  </p>
+                  <p
+                    className={
+                      "truncate h-8 w-96 border-gray-300 text-gray-600 text-lg  ml-4 p-0 m-0"
+                    }
+                  >
+                    {quiz.description || "some thing"}
+                  </p>
+                  <p
+                    className={
+                      "truncate h-8 w-64 border-gray-300 text-gray-600 text-lg  ml-4 p-0 m-0"
+                    }
+                  >
+                    {quiz.author}
+                  </p>
+                  <p
+                    className={
+                      "truncate h-8 w-64 border-gray-300 text-gray-600 text-lg  ml-4 p-0 m-0"
+                    }
+                  >
+                    {quiz.subscriptionType}
+                  </p>
+
+                  <p
+                    className={
+                      "truncate h-8 w-64 border-gray-300 text-gray-600 text-lg  ml-4 p-0 m-0"
+                    }
+                  >
+                    {new Date(quiz.createdAt).toDateString()}
+                  </p>
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      </div>
